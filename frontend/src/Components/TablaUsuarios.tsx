@@ -40,6 +40,7 @@ export default function TableUsuarios({ rows, setOpenModal, setUsuarioSelecciona
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
   const handleChangePage = (event: unknown, newPage: number) => {
+    console.info(event)
     setPage(newPage);
   };
 
