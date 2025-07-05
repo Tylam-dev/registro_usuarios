@@ -24,20 +24,7 @@ class UsuarioService
     public function crear(
         Usuario $usuario
     ): Usuario {
-        // Validar si no existe un usuario con la misma identificación
-        $usuarioExistente = $this->repo->obenerPorIdentificacion($usuario->getIdentificacion());
-        if ($usuarioExistente) {
-            throw ValidationException::withMessages([
-                'identificacion' => 'Ya existe un usuario con esta identificación.',
-            ]);
-        }
-
-        // Validaciones de fecha futura
-        if ($usuario->getFechaNacimiento() > new \DateTimeImmutable()) {
-            throw ValidationException::withMessages([
-                'fecha_nacimiento' => 'La fecha de nacimiento no puede ser futura.',
-            ]);
-        }
+        $this->ValidarUnicidad($usuario);
         // Validacion de fecha mayor de edad
         $edad = $usuario->getFechaNacimiento()->diff(now())->y;
         if ($edad < 18) {
@@ -78,8 +65,9 @@ class UsuarioService
     public function actualizar(
         Usuario $usuario
     ): Usuario {
-        $usuario = $this->repo->porId($usuario->getId());
-        if (! $usuario) {
+        $this->ValidarUnicidad($usuario);
+        $usuarioExistente = $this->repo->porId($usuario->getId());
+        if (! $usuarioExistente) {
             throw ValidationException::withMessages(['id' => 'Usuario no encontrado.']);
         }
         $this->repo->guardar($usuario);
@@ -93,5 +81,29 @@ class UsuarioService
     public function eliminar(int $id): void
     {
         $this->repo->eliminar($id);
+    }
+
+    private function ValidarUnicidad(
+        Usuario $usuario
+    ): void {
+        $usuarioExistente = null;
+        $usuarioExistente = $this->repo->obenerPorIdentificacion($usuario->getIdentificacion());
+        if ($usuarioExistente !== null && $usuarioExistente->getId() !== $usuario->getId()) {
+            throw ValidationException::withMessages([
+                'identificacion' => 'Ya existe un usuario con esta identificacion.',
+            ]);
+        }
+        $usuarioExistente = $this->repo->obtenerPorCorreo($usuario->getCorreo());
+        if ($usuarioExistente !== null && $usuarioExistente->getId() !== $usuario->getId()) {
+            throw ValidationException::withMessages([
+                'correo' => 'Ya existe un usuario con este correo electronico.',
+            ]);
+        }
+        $usuarioExistente = $this->repo->obtenerPorNombreUsuario($usuario->getNombreUsuario());
+        if ($usuarioExistente !== null && $usuarioExistente->getId() !== $usuario->getId()) {
+            throw ValidationException::withMessages([
+                'nombre_usuario' => 'Ya existe un usuario con este nombre de usuario.',
+            ]);
+        }
     }
 }

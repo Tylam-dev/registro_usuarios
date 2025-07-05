@@ -13,5 +13,15 @@ use App\Http\Controllers\UsuarioController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::apiResource('usuarios', UsuarioController::class);
+Route::group(['prefix' => 'v1'], function () {
+    // List all users
+    Route::get('usuarios', [UsuarioController::class, 'index']);
+    // Create a new user
+    Route::post('usuarios', [UsuarioController::class, 'store']);
+    // Retrieve a specific user
+    Route::get('usuarios/{usuario}', [UsuarioController::class, 'show']);
+    // Update a user (ID provided in payload, not URL)
+    Route::put('usuarios', [UsuarioController::class, 'update']);
+    // Delete a specific user
+    Route::delete('usuarios/{usuario}', [UsuarioController::class, 'destroy']);
+});

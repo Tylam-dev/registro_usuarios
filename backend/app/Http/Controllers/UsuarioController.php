@@ -6,6 +6,7 @@ use App\Service\UsuarioService;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rules\Enum;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use DateTimeImmutable;
@@ -62,6 +63,7 @@ class UsuarioController extends Controller
     public function store(Request $request): Response
     {
         try {
+            $this->ValidarCrear($request);
             $usuario = $this->usuarioService->crear($this->toDomain($request));
             $json = $this->serializer->serialize($usuario, 'json');
             return response($json, 200)
@@ -76,7 +78,7 @@ class UsuarioController extends Controller
         ], 400);
         } catch (Exception $e) {
             return response()->json([
-                'message' => 'Ha ocurrido un error inesperado. Por favor, comuníquese con Programacion.'
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -113,6 +115,7 @@ class UsuarioController extends Controller
     public function update(Request $request): Response
     {
         try {
+            $this->ValidarActualizar($request);
             $usuario = $this->usuarioService->actualizar($this->toDomain($request));
             return response()->json($usuario);
         } catch (ValidationException $e) {
@@ -152,18 +155,102 @@ class UsuarioController extends Controller
     private function toDomain(Request $request): Usuario
     {
         return new Usuario(
-            0,
+            $request['id']?? 0,
             $request['identificacion'],
-            $request['nombre_usuario'],
+            $request['nombreUsuario'],
             $request['nombres'],
             $request['apellidos'],
-            new DateTimeImmutable($request['fecha_nacimiento']),
+            new DateTimeImmutable($request['fechaNacimiento']),
             $request['celular'],
             $request['telefono'] ?? null,
             $request['correo'],
-            EstadoCivilEnum::from($request['estado_civil']),
+            EstadoCivilEnum::from($request['estadoCivil']),
             SexoEnum::from($request['sexo']),
             $request['direccion']
         );
     }
+    private function ValidarCrear(Request $request): void
+    {
+        $request->validate(
+            [
+                'id'               => 'in:0',
+                'identificacion'   => 'required|string|min:10',
+                'nombreUsuario'   => 'required|string',
+                'nombres'          => 'required|string|max:100',
+                'apellidos'        => 'required|string|max:100',
+                'fechaNacimiento' => 'required|date|before_or_equal:today',
+                'celular'          => 'required|regex:/^[0-9]{10,}$/',
+                'telefono'         => 'nullable|regex:/^[0-9]{7,}$/',
+                'correo'           => 'required|email',
+                'estadoCivil'     => ['required', new Enum(EstadoCivilEnum::class)],
+                'sexo'             => ['required', new Enum(SexoEnum::class)],
+                'direccion'        => 'required|string',
+            ],
+            [
+                'id.in'                     => 'No esta permitido enviar el campo id > 0 en post.',
+                'identificacion.required'   => 'La identificación es obligatoria.',
+                'identificacion.min'        => 'La identificación debe tener al menos 10 caracteres.',
+                'nombreUsuario.required'   => 'El nombre de usuario es obligatorio.',
+                'nombres.required'          => 'Los nombres son obligatorios.',
+                'nombres.max'               => 'Los nombres no pueden exceder 100 caracteres.',
+                'apellidos.required'        => 'Los apellidos son obligatorios.',
+                'apellidos.max'             => 'Los apellidos no pueden exceder 100 caracteres.',
+                'fechaNacimiento.required' => 'La fecha de nacimiento es obligatoria.',
+                'fechaNacimiento.date'     => 'La fecha de nacimiento debe ser una fecha válida.',
+                'fechaNacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+                'celular.required'          => 'El número de celular es obligatorio.',
+                'celular.regex'             => 'El celular debe ser numérico y tener al menos 10 dígitos.',
+                'telefono.regex'            => 'El teléfono debe ser numérico y tener al menos 7 dígitos.',
+                'correo.required'           => 'El correo electrónico es obligatorio.',
+                'correo.email'              => 'El correo debe ser una dirección válida.',
+                'estadoCivil.required'     => 'El estado civil es obligatorio.',
+                'estadoCivil.enum'         => 'El estado civil seleccionado no es válido.',
+                'sexo.required'             => 'El sexo es obligatorio.',
+                'sexo.enum'                 => 'El sexo seleccionado no es válido.',
+                'direccion.required'        => 'La dirección es obligatoria.',
+            ]
+        );
+    }
+    private function ValidarActualizar(Request $request): void
+    {
+        $request->validate(
+            [
+                'identificacion'   => 'required|string|min:10',
+                'nombreUsuario'   => 'required|string',
+                'nombres'          => 'required|string|max:100',
+                'apellidos'        => 'required|string|max:100',
+                'fechaNacimiento' => 'required|date|before_or_equal:today',
+                'celular'          => 'required|regex:/^[0-9]{10,}$/',
+                'telefono'         => 'nullable|regex:/^[0-9]{7,}$/',
+                'correo'           => 'required|email',
+                'estadoCivil'     => ['required', new Enum(EstadoCivilEnum::class)],
+                'sexo'             => ['required', new Enum(SexoEnum::class)],
+                'direccion'        => 'required|string',
+            ],
+            [
+                'identificacion.required'   => 'La identificación es obligatoria.',
+                'identificacion.min'        => 'La identificación debe tener al menos 10 caracteres.',
+                'nombreUsuario.required'   => 'El nombre de usuario es obligatorio.',
+                'nombres.required'          => 'Los nombres son obligatorios.',
+                'nombres.max'               => 'Los nombres no pueden exceder 100 caracteres.',
+                'apellidos.required'        => 'Los apellidos son obligatorios.',
+                'apellidos.max'             => 'Los apellidos no pueden exceder 100 caracteres.',
+                'fechaNacimiento.required' => 'La fecha de nacimiento es obligatoria.',
+                'fechaNacimiento.date'     => 'La fecha de nacimiento debe ser una fecha válida.',
+                'fechaNacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+                'celular.required'          => 'El número de celular es obligatorio.',
+                'celular.regex'             => 'El celular debe ser numérico y tener al menos 10 dígitos.',
+                'telefono.regex'            => 'El teléfono debe ser numérico y tener al menos 7 dígitos.',
+                'correo.required'           => 'El correo electrónico es obligatorio.',
+                'correo.email'              => 'El correo debe ser una dirección válida.',
+                'estadoCivil.required'     => 'El estado civil es obligatorio.',
+                'estadoCivil.enum'         => 'El estado civil seleccionado no es válido.',
+                'sexo.required'             => 'El sexo es obligatorio.',
+                'sexo.enum'                 => 'El sexo seleccionado no es válido.',
+                'direccion.required'        => 'La dirección es obligatoria.',
+            ]
+        );
+    }
 }
+
+

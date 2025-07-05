@@ -76,4 +76,20 @@ class EloquentUsuarioRepository implements IUsuarioRepository
         }
         return $this->toDomain($usuarioEncontrado);
     }
+    public function obtenerPorCorreo(string $correo): ?Usuario
+    {
+        $usuarioEncontrado = EloquentUsuario::where('correo', $correo)->first();
+        if (! $usuarioEncontrado) {
+            return null;
+        }
+        return $this->toDomain($usuarioEncontrado);
+    }
+    public function obtenerPorNombreUsuario(string $nombreUsuario): ?Usuario
+    {
+        $usuarioEncontrado = EloquentUsuario::where('nombre_usuario', $nombreUsuario)->first();
+        if (! $usuarioEncontrado) {
+            return null;
+            }
+        return $this->toDomain($usuarioEncontrado);
+    }
 }
