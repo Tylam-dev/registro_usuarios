@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: prueba_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: PruebaGF
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pgdata:

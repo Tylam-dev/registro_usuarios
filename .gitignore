@@ -1,0 +1,50 @@
+# --------------------------------------------------
+#  Laravel (PHP)
+# --------------------------------------------------
+
+/vendor/                     # dependencias de Composer
+/node_modules/               # si usas npm/yarn en Laravel (p. ej. Mix)
+/public/storage/             # si enlazas storage con public
+/storage/*.key               # llaves de cifrado
+/.env                        # archivo de configuración sensible
+/.env.*.phpunit              # cache de pruebas
+/.phpunit.result.cache       # cache PHPUnit
+Homestead.yaml
+Homestead.json
+/.vagrant                    # máquina virtual Homestead
+.phpstorm.meta.php           # perfiles de PhpStorm
+
+# --------------------------------------------------
+#  Node / React
+# --------------------------------------------------
+
+/node_modules/               # dependencias de npm/yarn
+/build/                      # carpeta de producción (Create-React-App)
+/dist/                       # otras salidas de bundlers
+/.env                        # variables de entorno generales
+/.env.local                  # variables en local (no versionar)
+/.env.*.local                # cualquier otro .env de entorno
+npm-debug.log*               # logs de npm
+yarn-debug.log*
+yarn-error.log*
+.pnp.js
+.pnp.cjs
+
+# --------------------------------------------------
+#  IDEs y SO
+# --------------------------------------------------
+
+# VS Code
+.vscode/
+/history/
+
+# PHPStorm, IntelliJ
+.idea/
+/*.iml
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
