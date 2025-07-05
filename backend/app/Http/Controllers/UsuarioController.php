@@ -16,6 +16,7 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use TypeError; 
 use Exception;
 
 class UsuarioController extends Controller
@@ -69,9 +70,13 @@ class UsuarioController extends Controller
             return response()->json([
                 'errors' => $e->errors()
             ], 422);
+        }catch (TypeError $e) {
+        return response()->json([
+            'message' => 'Parametros inválidos: ' . $e->getMessage(),
+        ], 400);
         } catch (Exception $e) {
             return response()->json([
-                'message' => 'Ha ocurrido un error inesperado. Por favor, comuníquese con Programación.'
+                'message' => 'Ha ocurrido un error inesperado. Por favor, comuníquese con Programacion.'
             ], 500);
         }
     }
@@ -79,17 +84,18 @@ class UsuarioController extends Controller
     /**
      * Muestra un usuario específico.
      */
-    public function show(Request $request): JsonResponse
+    public function show(int $id): Response
     {
         try {
-            $mapeo = $this->toDomain($request);
-            $usuario = $this->usuarioService->obtenerPorId($mapeo->getId());
+            $usuario = $this->usuarioService->obtenerPorId($id);
             if (! $usuario) {
                 return response()->json([
                     'message' => 'Usuario no encontrado.'
                 ], Response::HTTP_NOT_FOUND);
             }
-            return response()->json($usuario);
+            $json = $this->serializer->serialize($usuario, 'json');
+            return response($json, 200)
+                    ->header('Content-Type','application/json');
         } catch (ValidationException $e) {
             return response()->json([
                 'errors' => $e->errors()
@@ -104,7 +110,7 @@ class UsuarioController extends Controller
     /**
      * Actualiza un usuario existente.
      */
-    public function update(Request $request): JsonResponse
+    public function update(Request $request): Response
     {
         try {
             $usuario = $this->usuarioService->actualizar($this->toDomain($request));
@@ -113,6 +119,10 @@ class UsuarioController extends Controller
             return response()->json([
                 'errors' => $e->errors()
             ], 422);
+        }catch (TypeError $e) {
+        return response()->json([
+            'message' => 'Parametros invalidos: ' . $e->getMessage(),
+        ], 400);
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Ha ocurrido un error inesperado. Por favor, comuníquese con Programación.'
