@@ -12,32 +12,45 @@ use DateTimeImmutable;
 use App\Domain\EstadoCivilEnum;
 use App\Domain\SexoEnum;
 use App\Domain\Usuario;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Exception;
 
 class UsuarioController extends Controller
 {
     private UsuarioService $usuarioService;
+    private Serializer $serializer;
 
     public function __construct(UsuarioService $usuarioService)
     {
         $this->usuarioService = $usuarioService;
+        $this->serializer = new Serializer([
+            new DateTimeNormalizer(['datetime_format' => 'Y-m-d']),
+            new ObjectNormalizer()
+        ], 
+        [new JsonEncoder()]);
     }
 
     /**
      * Lista todos los usuarios.
      */
-    public function index(): JsonResponse
+    public function index(): Response
     {
         try {
             $usuarios = $this->usuarioService->listar();
-            return response()->json($usuarios);
+            
+            $json = $this->serializer->serialize($usuarios, 'json');
+            return response($json, 200)
+                    ->header('Content-Type','application/json');
         } catch (ValidationException $e) {
             return response()->json([
                 'errors' => $e->errors()
             ], 422);
         } catch (Exception $e) {
             return response()->json([
-                'message' => 'Ha ocurrido un error inesperado. Por favor, comuníquese con Programación.'
+                'message' => $e->getMessage() 
             ], 500);
         }
     }
@@ -45,11 +58,13 @@ class UsuarioController extends Controller
     /**
      * Almacena un nuevo usuario.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): Response
     {
         try {
             $usuario = $this->usuarioService->crear($this->toDomain($request));
-            return response()->json($usuario, Response::HTTP_CREATED);
+            $json = $this->serializer->serialize($usuario, 'json');
+            return response($json, 200)
+                    ->header('Content-Type','application/json');
         } catch (ValidationException $e) {
             return response()->json([
                 'errors' => $e->errors()
@@ -64,10 +79,11 @@ class UsuarioController extends Controller
     /**
      * Muestra un usuario específico.
      */
-    public function show(int $id): JsonResponse
+    public function show(Request $request): JsonResponse
     {
         try {
-            $usuario = $this->usuarioService->obtenerPorId($id);
+            $mapeo = $this->toDomain($request);
+            $usuario = $this->usuarioService->obtenerPorId($mapeo->getId());
             if (! $usuario) {
                 return response()->json([
                     'message' => 'Usuario no encontrado.'

@@ -5,6 +5,8 @@ namespace App\Repository;
 use App\Domain\Usuario;
 use App\Models\Usuario as EloquentUsuario;
 use App\Service\Interfaces\IUsuarioRepository;
+use App\Domain\EstadoCivilEnum;
+use App\Domain\SexoEnum;
 
 class EloquentUsuarioRepository implements IUsuarioRepository
 {
@@ -57,12 +59,12 @@ class EloquentUsuarioRepository implements IUsuarioRepository
             $entidad->nombre_usuario,
             $entidad->nombres,
             $entidad->apellidos,
-            $entidad->fecha_nacimiento,
+            $entidad->fecha_nacimiento->toDateTimeImmutable(),
             $entidad->celular,
             $entidad->telefono,
             $entidad->correo,
-            $entidad->estado_civil,
-            $entidad->sexo,
+            EstadoCivilEnum::from($entidad->estado_civil),
+            SexoEnum::from($entidad->sexo),
             $entidad->direccion,
         );
     }
