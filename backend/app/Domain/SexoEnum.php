@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\SexoEnum;
+namespace App\Domain;
 
 enum SexoEnum: string
 {

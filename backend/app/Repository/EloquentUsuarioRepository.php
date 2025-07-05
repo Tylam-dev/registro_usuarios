@@ -3,18 +3,11 @@
 
 namespace App\Repository;
 
-use App\Domain\Usuario\{Usuario};
+use App\Domain\Usuario;
 use App\Models\Usuario as EloquentUsuario;
+use App\Services\Interfaces\IUsuarioRepository;
 
-interface UsuarioRepository
-{
-    public function porId(int $idUsuario): ?Usuario;
-    public function obtenerTodos(): array;               
-    public function guardar(Usuario $usuario): void;
-    public function eliminar(int $id): void;
-}
-
-class EloquentUsuarioRepository implements UsuarioRepository
+class EloquentUsuarioRepository implements IUsuarioRepository
 {
     public function porId(int $idUsuario): ?Usuario
     {
@@ -35,19 +28,19 @@ class EloquentUsuarioRepository implements UsuarioRepository
     public function guardar(Usuario $usuario): void
     {
         $usuarioEncontrado = EloquentUsuario::updateOrCreate(
-            ['id' => $usuario->id()],
+            ['id' => $usuario->getId()],
             [
-                'identificacion'   => $usuario->identificacion(),
-                'nombre_usuario'   => $usuario->nombreUsuario(),
-                'nombres'          => $usuario->nombres(),
-                'apellidos'        => $usuario->apellidos(),
-                'fecha_nacimiento' => $usuario->fechaNacimiento()->format('Y-m-d'),
-                'celular'          => $usuario->celular(),
-                'telefono'         => $usuario->telefono(),
-                'correo'           => $usuario->correo(),
-                'estado_civil'     => $usuario->estadoCivil(),
-                'sexo'             => $usuario->sexo(),
-                'direccion'        => $usuario->direccion(),
+                'identificacion'   => $usuario->getIdentificacion(),
+                'nombre_usuario'   => $usuario->getNombreUsuario(),
+                'nombres'          => $usuario->getNombres(),
+                'apellidos'        => $usuario->getApellidos(),
+                'fecha_nacimiento' => $usuario->getFechaNacimiento()->format('Y-m-d'),
+                'celular'          => $usuario->getCelular(),
+                'telefono'         => $usuario->getTelefono(),
+                'correo'           => $usuario->getCorreo(),
+                'estado_civil'     => $usuario->getEstadoCivil(),
+                'sexo'             => $usuario->getSexo(),
+                'direccion'        => $usuario->getDireccion(),
             ]
         );
     }

@@ -6,6 +6,8 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 use App\Domain\EstadoCivilEnum;
 use App\Domain\SexoEnum;
+use DateTimeImmutable;
+use App\Domain\Usuario;
 
 class StoreUsuarioRequest extends FormRequest
 {
@@ -33,7 +35,7 @@ class StoreUsuarioRequest extends FormRequest
             'celular'          => 'required|regex:/^[0-9]{10,}$/',
             'telefono'         => 'nullable|regex:/^[0-9]{7,}$/',
             'correo'           => 'required|email|unique:usuarios,correo',
-            'estado_civil'     => ['required', new Enum(EstadoCivil::class)],
+            'estado_civil'     => ['required', new Enum(EstadoCivilEnum::class)],
             'sexo'             => ['required', new Enum(SexoEnum::class)],
             'direccion'        => 'required|string',
         ];
@@ -69,11 +71,11 @@ class StoreUsuarioRequest extends FormRequest
         /**
      * Map validated data to the Domain Usuario object.
      */
-    public function toDomain(): DomainUsuario
+    public function toDomain(): Usuario
     {
         $request = $this->validated();
 
-        return new DomainUsuario(
+        return new Usuario(
             0,
             $request['identificacion'],
             $request['nombre_usuario'],
@@ -83,8 +85,8 @@ class StoreUsuarioRequest extends FormRequest
             $request['celular'],
             $request['telefono'] ?? null,
             $request['correo'],
-            EstadoCivil::from($request['estado_civil']),
-            Sexo::from($request['sexo']),
+            EstadoCivilEnum::from($request['estado_civil']),
+            SexoEnum::from($request['sexo']),
             $request['direccion']
         );
     }

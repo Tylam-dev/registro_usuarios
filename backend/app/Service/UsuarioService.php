@@ -1,16 +1,16 @@
 <?php
-namespace App\Services;
+namespace App\Service;
 
-use App\Domain\Usuario\Usuario;
-use App\Repository\UsuarioRepository;
+use App\Services\Interfaces\IUsuarioRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Domain\Usuario;
 
 class UsuarioService
 {
-    private UsuarioRepository $repo;
+    private IUsuarioRepository $repo;
 
-    public function __construct(UsuarioRepository $repo)
+    public function __construct(IUsuarioRepository $repo)
     {
         $this->repo = $repo;
     }
@@ -24,13 +24,13 @@ class UsuarioService
         Usuario $usuario
     ): Usuario {
         // Validaciones de fecha futura
-        if ($fechaNacimiento > new \DateTimeImmutable()) {
+        if ($usuario->getFechaNacimiento() > new \DateTimeImmutable()) {
             throw ValidationException::withMessages([
                 'fecha_nacimiento' => 'La fecha de nacimiento no puede ser futura.',
             ]);
         }
         // Validacion de fecha mayor de edad
-        $edad = $fechaNacimiento->diff($now)->y;
+        $edad = $usuario->getFechaNacimiento()->diff(now())->y;
         if ($edad < 18) {
             throw ValidationException::withMessages([
                 'fecha_nacimiento' => 'El usuario debe ser mayor de edad.',
@@ -67,10 +67,9 @@ class UsuarioService
      * @throws ValidationException
      */
     public function actualizar(
-        int $id,
-        array $datos
+        Usuario $usuario
     ): Usuario {
-        $usuario = $this->repo->porId($id);
+        $usuario = $this->repo->porId($usuario->getId());
         if (! $usuario) {
             throw ValidationException::withMessages(['id' => 'Usuario no encontrado.']);
         }

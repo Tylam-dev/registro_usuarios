@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\EstadoCivilEnum;
+namespace App\Domain;
 
 enum EstadoCivilEnum: string
 {
