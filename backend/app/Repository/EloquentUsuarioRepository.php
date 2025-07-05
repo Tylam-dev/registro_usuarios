@@ -1,11 +1,10 @@
 <?php
-// archivo: app/Infrastructure/Persistence/EloquentUsuarioRepository.php
 
 namespace App\Repository;
 
 use App\Domain\Usuario;
 use App\Models\Usuario as EloquentUsuario;
-use App\Services\Interfaces\IUsuarioRepository;
+use App\Service\Interfaces\IUsuarioRepository;
 
 class EloquentUsuarioRepository implements IUsuarioRepository
 {
@@ -20,9 +19,9 @@ class EloquentUsuarioRepository implements IUsuarioRepository
 
     public function obtenerTodos(): array
     {
-        return EloquentUsuario::obtenerTodos()
+        return EloquentUsuario::all()
             ->map(fn(EloquentUsuario $usuario) => $this->toDomain($usuario))
-            ->obtenerTodos();
+            ->all();
     }
 
     public function guardar(Usuario $usuario): void
@@ -66,5 +65,13 @@ class EloquentUsuarioRepository implements IUsuarioRepository
             $entidad->sexo,
             $entidad->direccion,
         );
+    }
+    public function obenerPorIdentificacion(string $identificacion): ?Usuario
+    {
+        $usuarioEncontrado = EloquentUsuario::where('identificacion', $identificacion)->first();
+        if (! $usuarioEncontrado) {
+            return null;
+        }
+        return $this->toDomain($usuarioEncontrado);
     }
 }

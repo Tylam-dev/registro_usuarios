@@ -1,10 +1,11 @@
 <?php
 namespace App\Service;
 
-use App\Services\Interfaces\IUsuarioRepository;
+use App\Service\Interfaces\IUsuarioRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Domain\Usuario;
+
 
 class UsuarioService
 {
@@ -23,6 +24,14 @@ class UsuarioService
     public function crear(
         Usuario $usuario
     ): Usuario {
+        // Validar si no existe un usuario con la misma identificación
+        $usuarioExistente = $this->repo->obenerPorIdentificacion($usuario->getIdentificacion());
+        if ($usuarioExistente) {
+            throw ValidationException::withMessages([
+                'identificacion' => 'Ya existe un usuario con esta identificación.',
+            ]);
+        }
+
         // Validaciones de fecha futura
         if ($usuario->getFechaNacimiento() > new \DateTimeImmutable()) {
             throw ValidationException::withMessages([

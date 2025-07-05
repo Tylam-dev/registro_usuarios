@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreUsuarioRequest;
 use App\Service\UsuarioService;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Routing\Controller;
+use Illuminate\Http\Request;
+use DateTimeImmutable;
+use App\Domain\EstadoCivilEnum;
+use App\Domain\SexoEnum;
+use App\Domain\Usuario;
 use Exception;
 
 class UsuarioController extends Controller
@@ -41,10 +45,10 @@ class UsuarioController extends Controller
     /**
      * Almacena un nuevo usuario.
      */
-    public function store(StoreUsuarioRequest $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         try {
-            $usuario = $this->usuarioService->crear($request->toDomain());
+            $usuario = $this->usuarioService->crear($this->toDomain($request));
             return response()->json($usuario, Response::HTTP_CREATED);
         } catch (ValidationException $e) {
             return response()->json([
@@ -84,11 +88,10 @@ class UsuarioController extends Controller
     /**
      * Actualiza un usuario existente.
      */
-    public function update(StoreUsuarioRequest $request): JsonResponse
+    public function update(Request $request): JsonResponse
     {
         try {
-            $request->validate();
-            $usuario = $this->usuarioService->actualizar($request->toDomain());
+            $usuario = $this->usuarioService->actualizar($this->toDomain($request));
             return response()->json($usuario);
         } catch (ValidationException $e) {
             return response()->json([
@@ -118,5 +121,23 @@ class UsuarioController extends Controller
                 'message' => 'Ha ocurrido un error inesperado. Por favor, comuníquese con Programación.'
             ], 500);
         }
+    }
+
+    private function toDomain(Request $request): Usuario
+    {
+        return new Usuario(
+            0,
+            $request['identificacion'],
+            $request['nombre_usuario'],
+            $request['nombres'],
+            $request['apellidos'],
+            new DateTimeImmutable($request['fecha_nacimiento']),
+            $request['celular'],
+            $request['telefono'] ?? null,
+            $request['correo'],
+            EstadoCivilEnum::from($request['estado_civil']),
+            SexoEnum::from($request['sexo']),
+            $request['direccion']
+        );
     }
 }
