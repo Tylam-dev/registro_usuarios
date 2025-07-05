@@ -7,12 +7,20 @@ export async function getUsuarios(): Promise<Usuario[]> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const text = await response.text();
+    let raw: any[];
     try {
-      return JSON.parse(text) as Usuario[];
+      raw = JSON.parse(text) as any[];
     } catch (parseError) {
       console.error('Invalid JSON response:', text);
       throw parseError;
     }
+    // Flatten nested estadoCivil and sexo into strings
+    const flat = raw.map(item => ({
+      ...item,
+      estadoCivil: item.estadoCivil?.value ?? '',
+      sexo: item.sexo?.value ?? ''
+    }));
+    return flat as Usuario[];
   } catch (error) {
     console.error('Error fetching usuarios:', error);
     throw error;

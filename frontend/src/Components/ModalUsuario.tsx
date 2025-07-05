@@ -39,6 +39,7 @@ export default function ModalUsuario({isOpenModal, setOpenModal, usuarioSeleccio
   const handleGuardar = () => {
     (funcion == "EDITAR")? postUsuario(usuarioSeleccionado): updateUsuario(usuarioSeleccionado)
   }
+  console.log(usuarioSeleccionado)
   return (
     <div>
       <Modal
