@@ -37,13 +37,17 @@ function App() {
             Usuarios
           </Typography>
           <Button onClick={() => {setUsuarioSeleccionado(Usuario.usuarioNuevo()); 
+                                  setFuncionModal("CREAR");
                                   setOpenModal(true)} 
                           } 
             variant="contained" 
             sx={{ bgcolor: '#f0f2f5', color:'#111418'}}>Agregar</Button>
         </div>
         <div className='tableContainer'>
-          <TableUsuarios rows={usuarios} setOpenModal={setOpenModal} setUsuarioSeleccionado={setUsuarioSeleccionado}/>
+          <TableUsuarios rows={usuarios} 
+                          setOpenModal={setOpenModal}
+                          setUsuarioSeleccionado={setUsuarioSeleccionado}
+                          setFuncionModal={setFuncionModal}/>
         </div>
       </div>
       <ModalUsuario isOpenModal={isOpenModal} 

@@ -8,7 +8,7 @@ import Fade from '@mui/material/Fade';
 import Button from '@mui/material/Button';
 import type { Usuario } from '../Models/Usuario';
 import { deleteUsuario, postUsuario, updateUsuario } from '../Hooks/UsuariosHook';
-import { FormControl, InputLabel, MenuItem, Select, type SelectChangeEvent } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, Typography, type SelectChangeEvent } from '@mui/material';
 
 const style = {
   position: 'absolute',
@@ -27,19 +27,41 @@ interface ModalProps {
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
   usuarioSeleccionado: Usuario;
   setUsuarioSeleccionado: React.Dispatch<React.SetStateAction<Usuario>>;
-  funcion: string; // Optional prop for selected user
+  funcion: string; 
 }
 
 
 export default function ModalUsuario({isOpenModal, setOpenModal, usuarioSeleccionado, setUsuarioSeleccionado, funcion}: ModalProps) {
   const handleClose = () => setOpenModal(false);
 
-  const handleChangeSexo = (e: SelectChangeEvent) => setUsuarioSeleccionado(prev => ({ ...prev, sexo: e.target.value }))
+  const [mensajeError, setMensajeError] = React.useState<string>("")
   const handleChangeEstadoCivil = (e: SelectChangeEvent) => setUsuarioSeleccionado(prev => ({ ...prev, estadoCivil: e.target.value }))
-  const handleGuardar = () => {
-    (funcion == "EDITAR")? postUsuario(usuarioSeleccionado): updateUsuario(usuarioSeleccionado)
+  const handleChangeSexo = (e: SelectChangeEvent) =>  setUsuarioSeleccionado(prev => ({ ...prev, sexo: e.target.value }))
+  const handleGuardar = async() => {
+    try{
+      if(funcion == "EDITAR"){
+        await updateUsuario(usuarioSeleccionado)
+      }else if(funcion == "CREAR"){
+        await postUsuario(usuarioSeleccionado)
+      }
+      handleClose();
+    }catch(error)
+    {
+      setMensajeError(`${error}`)
+    }
   }
-  console.log(usuarioSeleccionado)
+  const handleEliminar = async() => {
+    try{
+      await deleteUsuario(usuarioSeleccionado)
+      handleClose();
+    }catch(error)
+    {
+      setMensajeError(`${error}`)
+    }
+  }
+  React.useEffect(() => {
+      setMensajeError("")
+    }, [isOpenModal]);
   return (
     <div>
       <Modal
@@ -57,7 +79,7 @@ export default function ModalUsuario({isOpenModal, setOpenModal, usuarioSeleccio
       >
         <Fade in={isOpenModal}>
           <Box sx={style}>
-            <form noValidate autoComplete="off">
+            <form noValidate autoComplete="off" onSubmit={(e)=> e.preventDefault }>
               <Grid container spacing={3} flexDirection={"column"} alignContent={"space-around"}>
                 <Grid container justifyContent={"center"}>
                   <Grid component={"div"}>
@@ -175,19 +197,22 @@ export default function ModalUsuario({isOpenModal, setOpenModal, usuarioSeleccio
                   </Grid>
                 </Grid>
               </Grid>
+              <Grid component={"div"} textAlign={"center"}>
+                <Typography color='red'>{mensajeError}</Typography>
+              </Grid>
                 <Grid component={"div"} >
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap:2 }}>
                     <Button onClick={handleClose} sx={{ color:'#111418'}}>Cancelar</Button>
                     <Button variant="contained" 
                             sx={{ bgcolor: '#f0f2f5', color:'#111418'}} 
-                            onClick={() => {; setOpenModal(false)}}>
+                            onClick={handleGuardar}>
                       Guardar
                     </Button>
-                    {funcion == "CREAR" 
+                    {funcion == "EDITAR" 
                       && 
                       <Button variant="contained" 
                               color={"error"} 
-                              onClick={() => {deleteUsuario(usuarioSeleccionado); setOpenModal(false)}}>
+                              onClick={handleEliminar}>
                         Eliminar
                       </Button>
                     }

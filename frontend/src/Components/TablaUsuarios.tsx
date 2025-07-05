@@ -31,10 +31,11 @@ const columns: readonly Column[] = [
 interface TableProps {
   rows: Usuario[];
   setUsuarioSeleccionado: React.Dispatch<React.SetStateAction<Usuario>>;
-  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>; // Optional prop for selected user
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setFuncionModal: React.Dispatch<React.SetStateAction<string>>; // Optional prop for selected user
 } 
 
-export default function TableUsuarios({ rows, setOpenModal, setUsuarioSeleccionado }: TableProps) {
+export default function TableUsuarios({ rows, setOpenModal, setUsuarioSeleccionado, setFuncionModal }: TableProps) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
@@ -74,6 +75,7 @@ export default function TableUsuarios({ rows, setOpenModal, setUsuarioSelecciona
                       const value = row[column.id as keyof Usuario];
                       return (
                         <TableCell onClick={() => {setUsuarioSeleccionado(row);
+                                                   setFuncionModal("EDITAR");
                                                    setOpenModal(true)}
                                             } key={column.id} align={column.align}>
                           {value.toString()}
