@@ -14,10 +14,6 @@ Formulario de registro de usuario con React (frontend) y Laravel (API backend).
 - [Ejecución en Desarrollo](#ejecución-en-desarrollo)
   - [Backend Laravel](#backend-laravel)
   - [Frontend React](#frontend-react)
-- [Compilación para Producción](#compilación-para-producción)
-  - [API Laravel](#api-laravel)
-  - [React](#react)
-- [Opcional: Docker](#opcional-docker)
 - [Licencia](#licencia)
 
 ## Descripción
